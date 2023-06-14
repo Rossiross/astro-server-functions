@@ -1,4 +1,11 @@
 ---
+const key = await Astro.locals.register("greet", async () => {
+	console.log("running in the server...")
+	await new Promise(resolve => setTimeout(resolve, 1000))
+	return "hello";
+});
+
+console.log("shouldn't run")
 ---
 
 <html lang="en">
@@ -11,5 +18,24 @@
 	</head>
 	<body>
 		<h1>Astro</h1>
+		<button id="greet-button">Greet</button>
+		<p id="message">Click the button!</p>
+		<script>
+			const buttonElement = document.getElementById("greet-button");
+			const messageElement = document.getElementById("message");
+			if (buttonElement instanceof HTMLButtonElement) {
+				buttonElement.addEventListener("click", async () => {
+					messageElement.innerText = "fetching..."
+					const response = await fetch("/", {
+						method: "POST",
+						body: JSON.stringify({
+							fnKey: "greet"
+						})
+					})
+					const result = await response.text()
+					messageElement.innerText = `result: ${result}`
+				});
+			}
+		</script>
 	</body>
 </html>
